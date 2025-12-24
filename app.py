@@ -9,6 +9,7 @@ import os
 import re
 import json
 import sqlite3
+import hashlib
 from datetime import datetime
 from flask import Flask, request, render_template, jsonify, g
 from bs4 import BeautifulSoup
@@ -100,11 +101,15 @@ def normalize_question(question_text):
 
 
 def create_question_hash(question_text, options_set):
-    """创建题目的唯一标识（基于题目文本和选项集合）"""
+    """创建题目的唯一标识（基于题目文本和选项集合）
+    
+    使用 SHA256 确保跨进程/跨重启一致性（Python内置hash()会随机化）
+    选项排序后再拼接，确保选项顺序打乱的同一道题生成相同的hash
+    """
     norm_q = normalize_question(question_text)
-    sorted_options = sorted(options_set)
+    sorted_options = sorted(options_set)  # 排序确保顺序无关
     combined = norm_q + '|' + '|'.join(sorted_options)
-    return str(hash(combined))
+    return hashlib.sha256(combined.encode('utf-8')).hexdigest()
 
 
 def get_text_with_breaks(element):
