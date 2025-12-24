@@ -339,18 +339,30 @@ def get_questions():
     
     db = get_db()
     
-    # 构建查询
+    # 构建查询 - 支持搜索题目和所有选项
     if search:
-        count_query = 'SELECT COUNT(*) FROM questions WHERE question LIKE ?'
+        count_query = '''
+            SELECT COUNT(*) FROM questions 
+            WHERE question LIKE ? 
+               OR option_a LIKE ? 
+               OR option_b LIKE ? 
+               OR option_c LIKE ? 
+               OR option_d LIKE ?
+        '''
         data_query = '''
             SELECT * FROM questions 
             WHERE question LIKE ? 
+               OR option_a LIKE ? 
+               OR option_b LIKE ? 
+               OR option_c LIKE ? 
+               OR option_d LIKE ?
             ORDER BY id DESC 
             LIMIT ? OFFSET ?
         '''
         search_param = f'%{search}%'
-        total = db.execute(count_query, (search_param,)).fetchone()[0]
-        questions = db.execute(data_query, (search_param, size, (page - 1) * size)).fetchall()
+        search_params = (search_param,) * 5
+        total = db.execute(count_query, search_params).fetchone()[0]
+        questions = db.execute(data_query, search_params + (size, (page - 1) * size)).fetchall()
     else:
         total = db.execute('SELECT COUNT(*) FROM questions').fetchone()[0]
         questions = db.execute(
