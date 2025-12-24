@@ -410,6 +410,38 @@ def get_history():
     return jsonify([dict(log) for log in logs])
 
 
+@app.route('/api/history/<int:log_id>/score', methods=['PUT'])
+def update_upload_score(log_id):
+    """更新上传记录的得分"""
+    try:
+        db = get_db()
+        
+        # 检查记录是否存在
+        log = db.execute('SELECT * FROM upload_logs WHERE id = ?', (log_id,)).fetchone()
+        if not log:
+            return jsonify({'success': False, 'error': '记录不存在'})
+        
+        data = request.get_json()
+        score_raw = data.get('score', None)
+        
+        # 处理得分：可以是数字、空字符串（清除得分）
+        if score_raw is None or str(score_raw).strip() == '':
+            score = None
+        else:
+            try:
+                score = float(score_raw)
+            except (TypeError, ValueError):
+                return jsonify({'success': False, 'error': '分数格式不正确'}), 400
+        
+        db.execute('UPDATE upload_logs SET score = ? WHERE id = ?', (score, log_id))
+        db.commit()
+        
+        return jsonify({'success': True, 'score': score})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
 @app.route('/api/history/<int:log_id>', methods=['DELETE'])
 def delete_upload_log(log_id):
     """删除上传记录并回退修改"""

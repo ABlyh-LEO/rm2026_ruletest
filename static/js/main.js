@@ -286,6 +286,10 @@ function loadHistory() {
 
             var html = '';
             data.forEach(function (item) {
+                var scoreDisplay = formatScore(item.score);
+                var scoreText = scoreDisplay ? scoreDisplay + ' 分' : '未填写';
+                var scoreClass = scoreDisplay ? 'history-score' : 'history-score no-score';
+
                 html += '<div class="history-item" id="history-' + item.id + '">' +
                     '<div class="history-info">' +
                     '<span class="history-time">📅 ' + item.uploaded_at + '</span>' +
@@ -293,14 +297,63 @@ function loadHistory() {
                     '新增 <strong>' + item.questions_added + '</strong> 道 | ' +
                     '更新 <strong>' + item.questions_updated + '</strong> 道' +
                     '</span>' +
+                    '<span class="' + scoreClass + '" id="score-display-' + item.id + '">' +
+                    '🏆 得分: <span class="score-value">' + scoreText + '</span>' +
+                    '</span>' +
                     '</div>' +
+                    '<div class="history-actions">' +
+                    '<button class="edit-score-btn" onclick="editScore(' + item.id + ', ' + (item.score !== null ? item.score : 'null') + ')" title="编辑得分">✏️</button>' +
                     '<button class="delete-btn" onclick="deleteHistory(' + item.id + ')" title="删除此记录">🗑️</button>' +
+                    '</div>' +
                     '</div>';
             });
             container.innerHTML = html;
         })
         .catch(function (err) {
             container.innerHTML = '<p style="color:#ff3232;">加载失败: ' + err.message + '</p>';
+        });
+}
+
+// 编辑得分
+function editScore(logId, currentScore) {
+    var promptText = '请输入新的得分（留空可清除得分）:';
+    var defaultValue = (currentScore !== null && currentScore !== undefined) ? String(currentScore) : '';
+    var newScore = prompt(promptText, defaultValue);
+
+    // 用户取消
+    if (newScore === null) {
+        return;
+    }
+
+    // 验证输入（允许空字符串表示清除得分）
+    newScore = newScore.trim();
+    if (newScore !== '' && isNaN(parseFloat(newScore))) {
+        alert('请输入有效的数字');
+        return;
+    }
+
+    fetch('/api/history/' + logId + '/score', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ score: newScore })
+    })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+            if (data.success) {
+                // 更新显示
+                var scoreDisplay = document.getElementById('score-display-' + logId);
+                if (scoreDisplay) {
+                    var formatted = formatScore(data.score);
+                    var scoreText = formatted ? formatted + ' 分' : '未填写';
+                    scoreDisplay.className = formatted ? 'history-score' : 'history-score no-score';
+                    scoreDisplay.innerHTML = '🏆 得分: <span class="score-value">' + scoreText + '</span>';
+                }
+            } else {
+                alert('更新失败: ' + data.error);
+            }
+        })
+        .catch(function (err) {
+            alert('更新失败: ' + err.message);
         });
 }
 
