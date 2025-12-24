@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RMUC 2026 规则测评题库</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 RMUC 2026 规则测评题库</h1>
+            <p>团队协作版 - 共享答题数据，提高正确率</p>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number" id="totalQuestions">-</div>
+                <div class="stat-label">题库总数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalAnswers">-</div>
+                <div class="stat-label">答题记录</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalUploads">-</div>
+                <div class="stat-label">上传次数</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('upload', event)">📤 上传HTML</button>
+            <button class="tab-btn" onclick="switchTab('questions', event)">📚 题库浏览</button>
+            <button class="tab-btn" onclick="switchTab('history', event)">📋 上传历史</button>
+        </div>
+
+        <!-- 上传标签页 -->
+        <div id="uploadTab" class="tab-content active">
+            <div class="upload-section">
+                <h2>📤 上传答题页面HTML</h2>
+
+                <div class="upload-instructions">
+                    <strong>使用说明：</strong>
+                    <ol>
+                        <li>完成问卷星答题（不要提交）</li>
+                        <li>在浏览器中按 <kbd>Ctrl+U</kbd> 或 <kbd>Cmd+Option+U</kbd> 查看网页源代码</li>
+                        <li>全选复制 (<kbd>Ctrl+A</kbd>, <kbd>Ctrl+C</kbd>)</li>
+                        <li>粘贴到下方文本框并点击上传</li>
+                    </ol>
+                </div>
+
+                <input id="scoreInput" class="score-input" type="number" inputmode="decimal" step="0.01"
+                    placeholder="本次分数（可选）">
+
+                <textarea id="htmlInput" placeholder="在此粘贴HTML源代码..."></textarea>
+
+                <button class="btn btn-primary" id="uploadBtn" onclick="uploadHtml()">
+                    🚀 解析并上传
+                </button>
+
+                <div class="result-box" id="resultBox"></div>
+            </div>
+        </div>
+
+        <!-- 题库标签页 -->
+        <div id="questionsTab" class="tab-content">
+            <div class="search-bar">
+                <input type="text" class="search-input" id="searchInput" placeholder="搜索题目内容..."
+                    onkeypress="if(event.key==='Enter')searchQuestions()">
+                <button class="search-btn" onclick="searchQuestions()">🔍 搜索</button>
+                <button class="search-btn" onclick="clearSearch()" style="background:#666;">清除</button>
+            </div>
+
+            <div id="questionsList" class="question-list">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>加载中...</p>
+                </div>
+            </div>
+
+            <div class="pagination" id="pagination"></div>
+        </div>
+
+        <!-- 历史标签页 -->
+        <div id="historyTab" class="tab-content">
+            <h2 style="color:#00d4ff;margin-bottom:20px;">📋 上传历史记录</h2>
+            <div id="historyList" class="history-list">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>加载中...</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>RMUC 2026 规则测评题库管理系统 | 团队协作版</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+
+</html>
